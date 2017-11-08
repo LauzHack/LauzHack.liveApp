@@ -15,3 +15,10 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+.idea/
+.classpath
+.metadata/
+.project
+.settings/
+project/target/
+/bin/
