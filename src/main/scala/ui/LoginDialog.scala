@@ -2,13 +2,13 @@ package ui
 
 import scalafx.application.Platform
 import scalafx.geometry.Insets
-import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control._
 import scalafx.scene.layout.GridPane
 import scalafx.stage.Stage
 import scalafx.Includes._
+import scalafx.scene.paint.Color
+import UIComponents.LoginButton
 
-case class LogInfo(username: String, password: String)
 object LoginDialog {
 
   def promptForLogin(stage: Stage, hasFailed: Boolean): Option[LogInfo] = {
@@ -19,9 +19,8 @@ object LoginDialog {
       headerText = "Login to LauzHack Live github project"
     }
 
-    // Set the button types.
-    val loginButtonType = new ButtonType("Login", ButtonData.OKDone)
-    dialog.dialogPane().buttonTypes = Seq(loginButtonType, ButtonType.Cancel)
+    // Set the buttons.
+    dialog.dialogPane().buttonTypes = Seq(LoginButton, ButtonType.Cancel)
 
     // Create the username and password labels and fields.
     val username = new TextField() {
@@ -36,7 +35,9 @@ object LoginDialog {
       vgap = 10
       padding = Insets(20, 100, 10, 10)
       if (hasFailed) {
-        add(new Label("Failed login"), 0, 0)
+        val failLabel = new Label("Failed login")
+        failLabel.textFill = Color.Red
+        add(failLabel, 0, 0)
       }
       add(new Label("Username:"), 0, 1)
       add(username, 1, 1)
@@ -46,7 +47,7 @@ object LoginDialog {
 
     // Enable/Disable login button depending on whether a username was
     // entered.
-    val loginButton = dialog.dialogPane().lookupButton(loginButtonType)
+    val loginButton = dialog.dialogPane().lookupButton(LoginButton)
     loginButton.disable = true
 
     // Do some validation (disable when username is empty).
@@ -59,19 +60,16 @@ object LoginDialog {
     // Request focus on the username field by default.
     Platform.runLater(username.requestFocus())
 
-    // When the login button is clicked, convert the result to
-    // a username-password-pair.
-    dialog.resultConverter = dialogButton =>
-      if (dialogButton == loginButtonType)
-        LogInfo(username.text(), password.text())
-      else
-        null
 
     val result = dialog.showAndWait()
 
     result match {
-      case x: Some[LogInfo] => x
-      case None => None
+      case Some(LoginButton) =>
+        Some(LogInfo(username.text(), password.text()))
+      case Some(ButtonType.Cancel) | None =>
+        None
     }
   }
 }
+
+case class LogInfo(username: String, password: String)

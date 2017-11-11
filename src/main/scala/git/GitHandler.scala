@@ -10,7 +10,7 @@ class GitHandler(logInfo: LogInfo) {
   import GitHandler._
 
   val LogInfo(user, pass) = logInfo
-  val repo = s"https://$user:$pass@github.com/LauzHack/Lauzhacklivepage.github.io"
+  val repo = s"https://$user:$pass@github.com/LauzHack/live"
   val testRepo = s"https://$user:$pass@github.com/tOverney/AreYouLauzHackBot"
 
   /**
@@ -45,25 +45,27 @@ class GitHandler(logInfo: LogInfo) {
     val Array(prefix, tail) = rawPage.split(startingMarker)
     val Array(lines, suffix) = tail.split(endingMarker)
 
-    val announces = lines.split('\n').toList.flatMap( line => Announce(line))
+    val announces = lines.split('\n').toList.flatMap( line => Announcement(line))
 
     LivePage(prefix, suffix, announces)
   }
 
   def commitAndPushFile(page: LivePage) = {
     // Update file
-    val f2 = new File("tmp/tmp.txt") // Temporary File
+    val f2 = new File("tmp.txt") // Temporary File
     val finalFile = new File(filePath)
     val w = new PrintWriter(f2)
-    (page.prefix ++ List(startingMarker) ++
-        page.announces.map(_.toString) ++ List(endingMarker)
+    val first :: second :: others = page.announces
+    (List(page.prefix) ++ List(startingMarker) ++ List(first.toString(VeryHigh)) ++ List(second.toString(High))
+      ++ others.map(_.toString(Normal)) ++ List(endingMarker) ++ List(page.suffix)
         ).foreach(w.println)
     w.close()
     f2.renameTo(finalFile)
 
     val currDir = new File("cloned")
     // commit
-    sys.process.Process(Seq("git","commit","-am","Update the live view"), currDir).!!
+    sys.process.Process(Seq("git","commit","-am","Update the live view."), currDir).!!
+    sys.process.Process(Seq("git","push","origin","master"), currDir).!!
   }
 
   def discard(): Unit = {
@@ -72,7 +74,7 @@ class GitHandler(logInfo: LogInfo) {
 }
 
 object GitHandler {
-  val filePath = "cloned/live.html"
+  val filePath = "cloned/index.html"
   val startingMarker = "<!-- INSERT ITEMS HERE -->"
   val endingMarker = "<!-- STOP INSERTING THERE -->"
 }
