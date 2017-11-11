@@ -1,16 +1,19 @@
 package datastruct
 
-case class LivePage(prefix: String, suffix: String, announces: List[Announce]) {
+class LivePage(val prefix: String, val suffix: String, var announces: List[Announce]) {
   def add(announce: Announce): LivePage = {
-    LivePage(prefix, suffix, announce :: announces)
+    announces = announce :: announces
+    this
   }
 
   def remove(announce: Announce): LivePage = {
-    LivePage(prefix, suffix, announces.filterNot(_ == announce))
+    announces = announces.filterNot(_ == announce)
+    this
   }
 
   def updateAnnounce(oldA: Announce, newA: Announce): LivePage = {
-    LivePage(prefix, suffix, announces.map{ case `oldA` => newA; case anyOther => anyOther })
+    announces = announces.map{ case `oldA` => newA; case anyOther => anyOther }
+    this
   }
 }
 

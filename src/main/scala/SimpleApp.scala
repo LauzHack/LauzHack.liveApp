@@ -20,7 +20,6 @@ import scalafx.scene.paint.Color
 object SimpleApp extends JFXApp {
 
   val opt: Option[GitHandler] = login()
-  var data: LivePage = _
 
   @scala.annotation.tailrec
   def login(attemptFailed: Boolean = false): Option[GitHandler] = {
@@ -44,7 +43,7 @@ object SimpleApp extends JFXApp {
     case Some(repository) =>
 
       repository.loadRepo()
-      data = repository.loadFile()
+      val data: LivePage = repository.loadFile()
 
       stage = new PrimaryStage {
         title = "LauzHack Live Edit"
@@ -53,16 +52,17 @@ object SimpleApp extends JFXApp {
             padding = Insets(25)
             top = new ImageView("logo.jpg")
 
+            def updateData(newData: LivePage) = {
+              list.items = ObservableBuffer(data.announces)
+              repository.commitAndPushFile(data)
+            }
+
             // Create a button to add new announcement
             val publishButton = new Button {
               margin = Insets(10)
               alignment = Pos.Center
               text = "Add a new announcement"
-              onAction = AddEventDialog.create(stage, data, {newData =>
-                data = newData
-                list.items = ObservableBuffer(data.announces)
-                repository.commitAndPushFile(data)
-              })
+              onAction = AddEventDialog.create(stage, data, updateData _)
             }
             val list = new ListView[Announce] {
               orientation = Orientation.Vertical
@@ -73,15 +73,20 @@ object SimpleApp extends JFXApp {
                   cell.textFill = Color.Black
                   cell.cursor = Cursor.Hand
                   cell.item.onChange { (_, _, entry) =>
-                    cell.text = entry.trimmedTxt()
+                    if (entry == null) {
+                      cell.text = ""
+                    } else {
+                      cell.text = entry.trimmedTxt()
+                    }
                   }
                   cell.onMouseClicked = { me: MouseEvent =>
-                    println("Hello")
-                    EditEventDialog.create(stage, cell.item.value, data, {newData =>
-                      data = newData
-                      items = ObservableBuffer(data.announces)
-                      repository.commitAndPushFile(data)
-                    })
+                    if (!cell.isEmpty) {
+                      println("Hello")
+                      EditEventDialog.create(stage, cell.item.value, data, { newData =>
+                        items = ObservableBuffer(data.announces)
+                        repository.commitAndPushFile(data)
+                      })
+                    }
                   }
                   cell
                 }

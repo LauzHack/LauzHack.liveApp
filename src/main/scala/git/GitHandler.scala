@@ -47,7 +47,7 @@ class GitHandler(logInfo: LogInfo) {
 
     val announces = lines.split('\n').toList.flatMap( line => Announcement(line))
 
-    LivePage(prefix, suffix, announces)
+    new LivePage(prefix, suffix, announces)
   }
 
   def commitAndPushFile(page: LivePage) = {

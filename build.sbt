@@ -1,5 +1,7 @@
 scalaVersion := "2.12.4"
 
+version := "0.2"
+
 libraryDependencies ++= Seq(
   "org.scalafx" %% "scalafx" % "8.0.144-R12",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6"
